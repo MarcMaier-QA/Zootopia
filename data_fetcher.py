@@ -4,8 +4,13 @@ Module for fetching animal data from the API.
 """
 
 import requests
+import os
+from dotenv import load_dotenv
 
-API_KEY = "3YVnDWrvMPeTKxic/mWOJA==c4MjPJpK2cD9qF9Q"
+
+# Load environment variables from .env file
+load_dotenv()
+API_KEY = os.getenv("API_KEY")  # Read API_KEY from .env
 
 def fetch_data(animal_name: str):
     """
