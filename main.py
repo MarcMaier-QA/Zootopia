@@ -6,14 +6,14 @@ API_KEY = "3YVnDWrvMPeTKxic/mWOJA==c4MjPJpK2cD9qF9Q"
 
 def fetch_animals(animal_name: str):
     """
-    Fetches animal dara from the Animals API using the provided animal name.
+    Fetches animal data from the Animals API using the provided animal name.
 
     Args:
         animal_name (str): The name of the animal to search for.
 
     Returns:
         list: A list of dictionaries containing animal information.
-        Returns an empty list if no animals are found or if an error occurs.
+            Returns an empty list if no animals are found or if an error occurs.
     """
     # Construct the API endpoint with the animal name
     url = f"https://api.api-ninjas.com/v1/animals?name={animal_name}"
@@ -34,6 +34,7 @@ def fetch_animals(animal_name: str):
 def generate_website(animals, animal_name):
     """
     Generates an HTML file displaying information about the animals.
+    If no animal are found displays a friendly error message.
 
     Args:
         animals (list): List of animal dictionaries from the API.
@@ -56,9 +57,10 @@ def generate_website(animals, animal_name):
             html_content += f"<p>Diet: {animal.get('diet', 'Unknown')}</p>"
             html_content += "</div>"
     else:
-        html_content += f"<h2>The animal '{animal_name}' doesn't exist.</h2>"
+        html_content += f"<h2 style='color:red;'>The animal '{animal_name}' doesn't exist.</h2>"
+        html_content += "<p>Please try another animal name.</p>"
 
-    html_content += "<body></html>"
+    html_content += "</body></html>"
 
     # Save HTML to file
     with open("animals.html", "w", encoding="utf-8") as file:
@@ -70,7 +72,7 @@ def generate_website(animals, animal_name):
 # Main program
 if __name__ == "__main__":
     # Ask user for animal input
-    user_input = input("Enter a name of an animal").strip()
+    user_input = input("Enter a name of an animal: ").strip()
 
     # Fetch animal data
     animals = fetch_animals(user_input)
