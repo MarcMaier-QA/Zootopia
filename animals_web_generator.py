@@ -1,55 +1,70 @@
-# animals_web_generator.py
 """
-Main module for generating an animal website.
+Main module for generating an animal website using a template.
 """
 
 import data_fetcher
+import os
+
+TEMPLATE_FILE = "animals_template.html"
+OUTPUT_FILE = "animals.html"
 
 def generate_website(animals, animal_name):
     """
     Generates an HTML file displaying information about the animals.
-    If no animal are found displays a friendly error message.
+    Only displays fields that are available.
 
     Args:
         animals (list): List of animal dictionaries from the API.
         animal_name (str): The name of the animal queried.
     """
-    html_content = "<html><head><title>Animals</title></head><body>"
+    # Load HTML template
+    if not os.path.exists(TEMPLATE_FILE):
+        print(f"Error: Template file '{TEMPLATE_FILE}' not found.")
+        return
 
-    if animals:
-        html_content += f"<h1>Results for '{animal_name}'</h1>"
-        for animal in animals:
-            html_content += "<div style='margin-bottom:20px;'>"
-            html_content += f"<h2>{animal.get('name', 'Unknown')}</h2>"
-            html_content += f"<p>Latin Name: {animal.get('latin_name', 'Unknown')}</p>"
-            html_content += f"<p>Type: {animal.get('animal_type', 'Unknown')}</p>"
-            html_content += f"<p>Active Time: {animal.get('active_time', 'Unknown')}</p>"
-            html_content += f"<p>Length: {animal.get('length_min', '?')} - {animal.get('length_max', '?')} ft</p>"
-            html_content += f"<p>Weight: {animal.get('weight_min', '?')} - {animal.get('weight_max', '?')} lbs</p>"
-            html_content += f"<p>Lifespan: {animal.get('lifespan', '?')} years</p>"
-            html_content += f"<p>Habitat: {animal.get('habitat', 'Unknown')}</p>"
-            html_content += f"<p>Diet: {animal.get('diet', 'Unknown')}</p>"
-            html_content += "</div>"
-    else:
-        html_content += f"<h2 style='color:red;'>The animal '{animal_name}' doesn't exist.</h2>"
-        html_content += "<p>Please try another animal name.</p>"
+    with open(TEMPLATE_FILE, "r", encoding="utf-8") as f:
+        template = f.read()
 
-    html_content += "</body></html>"
+    animals_html = ""
 
-    # Save HTML to file
-    with open("animals.html", "w", encoding="utf-8") as file:
-        file.write(html_content)
+    for animal in animals:
+        card = "<li class='cards__item'>"
+        card += f"<h2 class='card__title'>{animal.get('name')}</h2>"
 
-    print("Website was successfully generated to the file animals.html")
+        if animal.get('latin_name'):
+            card += f"<p>Latin Name: {animal['latin_name']}</p>"
+        if animal.get('animal_type'):
+            card += f"<p>Type: {animal['animal_type']}</p>"
+        if animal.get('active_time'):
+            card += f"<p>Active Time: {animal['active_time']}</p>"
+        if animal.get('length_min') and animal.get('length_max'):
+            card += f"<p>Length: {animal['length_min']} - {animal['length_max']} ft</p>"
+        if animal.get('weight_min') and animal.get('weight_max'):
+            card += f"<p>Weight: {animal['weight_min']} - {animal['weight_max']} lbs</p>"
+
+        char = animal.get("characteristics", {})
+        if char.get("lifespan"):
+            card += f"<p>Lifespan: {char['lifespan']}</p>"
+        if char.get("habitat"):
+            card += f"<p>Habitat: {char['habitat']}</p>"
+        if char.get("diet"):
+            card += f"<p>Diet: {char['diet']}</p>"
+
+        card += "</li>"
+        animals_html += card
+
+    if not animals_html:
+        animals_html = f"<h2 style='color:red;'>The animal '{animal_name}' doesn't exist.</h2>"
+
+    html_content = template.replace("__REPLACE_ANIMALS_INFO__", animals_html)
+
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        f.write(html_content)
+
+    print(f"Website was successfully generated to {OUTPUT_FILE}")
 
 
-# Main program
 if __name__ == "__main__":
-    # Ask user for animal input
     user_input = input("Enter a name of an animal: ").strip()
-
-    # Fetch animal data
     animals = data_fetcher.fetch_data(user_input)
-
-    # Generate website
     generate_website(animals, user_input)

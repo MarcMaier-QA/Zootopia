@@ -1,4 +1,3 @@
-# data_fetcher.py
 """
 Module for fetching animal data from the API.
 """
@@ -6,7 +5,6 @@ Module for fetching animal data from the API.
 import requests
 import os
 from dotenv import load_dotenv
-
 
 # Load environment variables from .env file
 load_dotenv()
@@ -23,18 +21,13 @@ def fetch_data(animal_name: str):
         list: A list of dictionaries containing animal information.
             Returns an empty list if no animals are found or if an error occurs.
     """
-    # Construct the API endpoint with the animal name
     url = f"https://api.api-ninjas.com/v1/animals?name={animal_name}"
-
-    # set the header with the API key
     headers = {"X-Api-Key": API_KEY}
 
-    # Send a GET request to the API
-    response = requests.get(url, headers=headers)
-
-    # Check if the request was successful
-    if response.status_code == 200:
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
         return response.json()
-    else:
-        print(f"Error: {response.status_code}, {response.text}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching data: {e}")
         return []
